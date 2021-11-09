@@ -1,0 +1,74 @@
+import numpy as np
+import pandas as pd
+from scipy.stats import pearsonr, chi2_contingency
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+import codecademylib3
+np.set_printoptions(suppress=True, precision = 2)
+
+nba = pd.read_csv('./nba_games.csv')
+
+# Subset Data to 2010 Season, 2014 Season
+nba_2010 = nba[nba.year_id == 2010]
+nba_2014 = nba[nba.year_id == 2014]
+
+print(nba_2010.head())
+print(nba_2014.head())
+
+knicks_pts_2010 = nba_2010.pts[nba.fran_id == 'Knicks']
+nets_pts_2010 = nba_2010.pts[nba.fran_id == 'Nets']
+
+knicks_pts_2010_mean = np.mean(knicks_pts_2010)
+nets_pts_2010_mean = np.mean(nets_pts_2010)
+
+diff_means_2010 = knicks_pts_2010_mean - nets_pts_2010_mean
+print(diff_means_2010)
+
+plt.hist(knicks_pts_2010, label='knicks', normed=True, alpha= 0.7, color='blue')
+plt.hist(nets_pts_2010, label='nets', normed= True, alpha=0.7, color='red')
+plt.legend()
+plt.show()
+
+knicks_pts_2014 = nba_2014.pts[nba.fran_id == 'Knicks']
+nets_pts_2014 = nba_2014.pts[nba.fran_id == 'Nets']
+
+knicks_pts_2014_mean = np.mean(knicks_pts_2014)
+nets_pts_2014_mean = np.mean(nets_pts_2014)
+
+diff_means_2014 = knicks_pts_2014_mean - nets_pts_2014_mean
+print(diff_means_2014)
+
+plt.clf()
+plt.hist(knicks_pts_2014, label='knicks', normed=True, alpha= 0.7, color='blue')
+plt.hist(nets_pts_2014, label='nets', normed= True, alpha=0.7, color='red')
+plt.legend()
+plt.show()
+
+plt.clf()
+sns.boxplot(data=nba_2010, x = nba_2010.fran_id, y = nba_2010.pts)
+plt.show()
+
+location_result_freq = pd.crosstab(nba_2010.game_result, nba_2010.game_location)
+print(location_result_freq)
+
+location_result_proportions = location_result_freq/len(nba_2010)
+print(location_result_proportions)
+
+chi2, pval, dof, expected = chi2_contingency(location_result_proportions)
+print(expected)
+print(chi2)
+# There is no association between game results and game locations
+
+cov_forecast_point_diff = np.cov(nba_2010.forecast, nba_2010.point_diff)
+print(cov_forecast_point_diff)
+# Covariance = 1.37
+
+corr_forecast_point_diff, p= pearsonr(nba_2010.forecast, nba_2010.point_diff)
+print(corr_forecast_point_diff)
+
+plt.clf()
+plt.scatter(x = nba_2010.forecast, y = nba_2010.point_diff)
+plt.xlabel('Forecasted Win Prob.')
+plt.ylabel('Point Differential')
+plt.show()
